@@ -11,6 +11,7 @@ import play.libs.WS.*;
 import play.libs.WS;
 import play.mvc.*;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import models.APIManager;
@@ -18,7 +19,8 @@ import models.APIManager;
 
 public class Application extends Controller {    
 	static String redirectUri="http://test:9000";
-    
+	static boolean connection=false;
+     
 public static APIManager LINKEDIN = new APIManager (
 	            "https://www.linkedin.com/uas/oauth2/authorization",
 	            "https://www.linkedin.com/uas/oauth2/accessToken",
@@ -27,8 +29,8 @@ public static APIManager LINKEDIN = new APIManager (
 	    );
     public static void index() 
     {       
-
-        render();
+    	//String accessToken_linkedin = Cache.get("accessToken_linkedin_" + session.getId(), String.class);
+    	render();
     }
     
     //Fonction du premier bouton : connexion
@@ -38,6 +40,7 @@ public static APIManager LINKEDIN = new APIManager (
         	//utilisation de la methode de APIManager qui utiliser la methode post() au lieu de get()
             String accessToken = LINKEDIN.fetchAccessToken(authURL_linkedin(), "grant_type", "authorization_code");
             //Sauvegarde du accessToken dans le cache	
+          
             Cache.set("accessToken_linkedin_" + session.getId(), accessToken, "30mn");
             JsonObject monJsonObj = LINKEDIN.getConnectionsLinkedIn("https://api.linkedin.com/v1/people/~:(id,first-name,last-name,picture-url,public-profile-url)", accessToken);
             
@@ -51,7 +54,10 @@ public static APIManager LINKEDIN = new APIManager (
             }
             
             String profil = monJsonObj.get("publicProfileUrl").getAsString();
-			
+            if(Cache.get("Me_") == null) {
+            	//Contact me = new Contact(idUser, Network.LINKEDIN, firstNameUser + " " + lastNameUser, null, null, profil, picture, null, null);
+                //Cache.set("Me_" + session.getId(), me, "30mn");
+            }
            
       
         }
@@ -60,13 +66,14 @@ public static APIManager LINKEDIN = new APIManager (
 	    	Map params_code = new HashMap <String, String> ();
 	    	params_code.put("response_type", "code");
 	    	params_code.put("state", "ABYUJGH15682gsr4ux565");
+	    	connection=true;
 	    	LINKEDIN.retrieveVerificationCode(authURL_linkedin(), params_code);
         }
     }
     
 
     static String authURL_linkedin() {
-        return play.mvc.Router.getFullUrl("Application.auth_linkedin");
+        return "http://test:9000";
     }
     
 	  public static void logoutFrom_linkedin() {

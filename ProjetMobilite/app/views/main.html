@@ -14,7 +14,7 @@
         <script src="@{'/public/javascripts/bootstrap.js'}"  type="text/javascript" charset="${_response_encoding}"></script>
         #{get 'moreScripts' /}
     </head>
-    <body>
+    <body oncomplete="initialize()" onunload="GUnload()">
         #{doLayout /}
     </body>
 </html>
