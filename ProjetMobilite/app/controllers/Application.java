@@ -22,7 +22,7 @@ public class Application extends Controller {
 	static boolean connection=false;
 
      
-public static APIManager LINKEDIN = new APIManager (
+public static APIManager linkedin = new APIManager (
 	            "https://www.linkedin.com/uas/oauth2/authorization",
 	            "https://www.linkedin.com/uas/oauth2/accessToken",
 	            "776bn8svtj9a0q",
@@ -32,14 +32,13 @@ public static APIManager LINKEDIN = new APIManager (
     {
     	if(connection==true)   
     {
-    	String accessToken_linkedin = Cache.get("accessToken_linkedin_" + session.getId(), String.class);
+    	String accessLink = Cache.get("accessLink_" + session.getId(), String.class);
     	Contact me= Cache.get("Me_" + session.getId(), Contact.class);
-    	render(me,accessToken_linkedin);
+    	render(me,accessLink);
     }
     else
     {
-    	Contact me= new Contact("test","test","test",null);
-    	render(me);
+    	render();
     }
     	
     }
@@ -48,40 +47,28 @@ public static APIManager LINKEDIN = new APIManager (
     public static void auth_linkedin() {
         if (OAuth2.isCodeResponse()) {
         	
-        	//Seconde etape, echange du code contre un access token
-        	//utilisation de la methode de APIManager qui utiliser la methode post() au lieu de get()
-            String accessToken = LINKEDIN.fetchAccessToken(authURL_linkedin(), "grant_type", "authorization_code");
-            //Sauvegarde du accessToken dans le cache	
-          
-            Cache.set("accessToken_linkedin_" + session.getId(), accessToken, "30mn");
-            JsonObject obj = LINKEDIN.getConnectionsLinkedIn("https://api.linkedin.com/v1/people/~:(id,first-name,last-name,picture-url,public-profile-url)", accessToken);
+            String accessToken = linkedin.fetchAccessToken(authURL_linkedin(), "grant_type", "authorization_code");
+            Cache.set("accessLink_" + session.getId(), accessToken, "30mn");
+            JsonObject obj = linkedin.getConnectionsLinkedIn("https://api.linkedin.com/v1/people/~:(id,first-name,last-name,picture-url,public-profile-url)", accessToken);
             
-            String idUser			= obj.get("id").getAsString();
-            String firstNameUser 	= obj.get("firstName").getAsString();
-            String lastNameUser 	= obj.get("lastName").getAsString();
-            String picture 			= "/public/images/nophoto.png";
-
-            Cache.set("Me_" + session.getId(), firstNameUser, "30mn");
-            if(obj.has("pictureUrl")) {
-            	picture = obj.get("pictureUrl").getAsString();
-            }
-            
-            String profil = obj.get("publicProfileUrl").getAsString();
+            String idUser	= obj.get("id").getAsString();
+            String nomUser 	= obj.get("firstName").getAsString();
+            String prenomUser = obj.get("lastName").getAsString();
+   
             if(Cache.get("Me_") == null) {
-            	Contact me = new Contact(idUser, firstNameUser, lastNameUser, null);
+            	Contact me = new Contact(idUser, nomUser, prenomUser, null);
                 Cache.set("Me_" + session.getId(), me, "30mn");
             }
             connection=true;
-            redirect("http://test:9000");
+            redirect("http://linkedin:9000");
       
         }
         else {
         	//Premiere etape, recuperation du verfication de code
-	    	Map params_code = new HashMap <String, String> ();
-	    	params_code.put("response_type", "code");
-	    	params_code.put("state", "ABYUJGH15682gsr4ux565");
-	    	
-	    	LINKEDIN.retrieveVerificationCode(authURL_linkedin(), params_code);
+	    	Map parametre = new HashMap <String, String> ();
+	    	parametre.put("response_type", "code");
+	    	parametre.put("state", "ABYUJGH15682gsr4ux565");
+	    	linkedin.retrieveVerificationCode(authURL_linkedin(), parametre);
 	    	
         }
     }
@@ -92,11 +79,12 @@ public static APIManager LINKEDIN = new APIManager (
     }
     
 	  public static void logoutFrom_linkedin() {
-			Cache.delete("accessToken_linkedin_" + session.getId());
+			Cache.delete("accessLink_" + session.getId());
 			Cache.delete("Me_" + session.getId());
-			redirect("http://test:9000");
+			redirect("http://linkedin:9000");
 			
 		 }	
+	  
 
 
 
