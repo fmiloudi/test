@@ -3,7 +3,7 @@
 
 <div class="navbar-inverse">
    #{if accessToken_linkedin}
-   <p class="bonjour">Bonjour ${me.getPrenom()} ${me.getNom()} <p>
+   <span class="label label-info">Bonjour ${me.getPrenom()} ${me.getNom()} </span>
       #{/if}
 		#{else}
 		#{/else}
@@ -27,30 +27,34 @@
   <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
     <ul class="nav navbar-nav">
     #{if accessToken_linkedin}
-      #{/if}
-		#{else}
-		 <li class="active"><a href="@{auth_linkedin()}">Connexion</a></li>
-		#{/else}
-      <li class="dropdown">
-        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Contacts <b class="caret"></b></a>
+          <li class="dropdown">
+        <a href="#" class="btn dropdown-toggle" data-toggle="dropdown">Contacts <b class="caret"></b></a>
         <ul class="dropdown-menu">
           <li><a href="#">Récuperer les contacts</a></li>
           <li><a href="#">Supprimer les contacts</a></li>
         </ul>
       </li>
-      
-    </ul>
- 
-    
-    <form class="navbar-form navbar-left" role="search">
+        <form class="navbar-form navbar-left" role="search">
       <div class="form-group">
         <input type="text" class="form-control" placeholder="Contact">
       </div>
       <button type="submit" class="btn btn-success">Chercher</button>
     </form>
-    <ul class="nav navbar-nav navbar-right">
+     </ul>
+  	 <ul class="nav navbar-nav navbar-right">
       <li><a href="@{logoutFrom_linkedin()}">Déconnexion</a></li>
-         </ul>
-  </div><!-- /.navbar-collapse -->
+       </ul>
+      #{/if}
+		#{else}
+		 <li class="active"><a href="@{auth_linkedin()}">Connexion</a></li>
+		  </ul>
+		#{/else}
+
+      
+   
+ 
+
+  
+  </div>
 </nav>
 </div>
