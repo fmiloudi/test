@@ -1,15 +1,18 @@
 package controllers;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import play.*;
 import play.cache.Cache;
 import play.db.DB;
+import play.db.jpa.GenericModel.JPAQuery;
 import play.libs.OAuth2;
 import play.libs.WS.*;
 import play.libs.WS;
 import play.mvc.*;
+import antlr.collections.List;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -20,7 +23,7 @@ import models.Contact;
 
 public class Application extends Controller {    
 	static boolean connection=false;
-
+	static boolean contact=false;
      
 public static APIManager linkedin = new APIManager (
 	            "https://www.linkedin.com/uas/oauth2/authorization",
@@ -30,12 +33,30 @@ public static APIManager linkedin = new APIManager (
 	    );
     public static void index() 
     {
+    	
     	if(connection==true)   
     {
     	String accessLink = Cache.get("accessLink_" + session.getId(), String.class);
     	String test = Cache.get("test_" + session.getId(), String.class);
     	Contact me= Cache.get("Me_" + session.getId(), Contact.class);
-    	render(me,accessLink,test);
+    
+    	java.util.List<Contact> listeContacts;
+
+    	java.util.List<Contact> listeContactsReduit = new ArrayList<Contact>() ;
+    	
+   if(contact==true)
+   {
+	   listeContacts = Contact.findAll();
+	   for(int i=0; i<6 && i<listeContacts.size(); i++)
+	   {
+		   listeContactsReduit.add(listeContacts.get(i));
+	   }
+
+   	render(me,accessLink,test, listeContactsReduit);
+   }
+
+	render(me,accessLink,test);
+    
     }
     else
     {
@@ -98,7 +119,23 @@ public static APIManager linkedin = new APIManager (
 	    	Integer nbContact = (int)monJsonObj.get("_total").getAsDouble();
 	    	String test = String.valueOf(nbContact);
 	    	Cache.set("test_" + session.getId(), test, "30mn");
+	    	HashMap<String,Double> coor = new HashMap<String,Double>();
+	    	String id, nom, prenom, headline, location, picture, profil;
+	    	for (int i=0; i<nbContact; i++)
+	    	{
+	    		id = monJsonObj.get("values").getAsJsonArray().get(i).getAsJsonObject().get("id")
+						.getAsString();
+	    		nom = monJsonObj.get("values").getAsJsonArray().get(i).getAsJsonObject().get("firstName")
+						.getAsString();
+	    		prenom = monJsonObj.get("values").getAsJsonArray().get(i).getAsJsonObject().get("lastName")
+						.getAsString();
+	    		
+	    		Contact c = new Contact(id, nom,prenom,null);
+	    		c._save();
+	    	}
+	    	contact=true;
 	    	index();
+	    	
 
 	  }
 	  

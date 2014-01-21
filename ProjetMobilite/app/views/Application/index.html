@@ -54,5 +54,17 @@
 		  </ul>
 		#{/else}  
   </div>
+  <div>
+  		<address class="container row-fluid">
+					#{list items:listeContactsReduit, as:'contact'}
+					<div class="span6">
+						<a href="#" target="_blank"><strong>
+							${contact.getNom()}
+						</strong></a>
+						
+					</div>
+						#{/list}
+				</address>
+  </div>
 </nav>
 </div>
