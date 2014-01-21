@@ -33,8 +33,9 @@ public static APIManager linkedin = new APIManager (
     	if(connection==true)   
     {
     	String accessLink = Cache.get("accessLink_" + session.getId(), String.class);
+    	String test = Cache.get("test_" + session.getId(), String.class);
     	Contact me= Cache.get("Me_" + session.getId(), Contact.class);
-    	render(me,accessLink);
+    	render(me,accessLink,test);
     }
     else
     {
@@ -49,7 +50,7 @@ public static APIManager linkedin = new APIManager (
         	
             String accessToken = linkedin.fetchAccessToken(authURL_linkedin(), "grant_type", "authorization_code");
             Cache.set("accessLink_" + session.getId(), accessToken, "30mn");
-            JsonObject obj = linkedin.getConnectionsLinkedIn("https://api.linkedin.com/v1/people/~:(id,first-name,last-name,picture-url,public-profile-url)", accessToken);
+            JsonObject obj = linkedin.getConnectionsLinkedIn("https://api.linkedin.com/v1/people/~:(id,first-name,last-name,picture-url)", accessToken);
             
             String idUser	= obj.get("id").getAsString();
             String nomUser 	= obj.get("firstName").getAsString();
@@ -84,6 +85,22 @@ public static APIManager linkedin = new APIManager (
 			redirect("http://linkedin:9000");
 			
 		 }	
+	  
+	  public static void recuprerContact()
+	  {
+		 	String accessToken = Cache.get("accessLink_" + session.getId(), String.class);
+		 	
+	    	//Récupération des contacts
+	    	JsonObject monJsonObj = linkedin.getConnectionsLinkedIn("https://api.linkedin.com/v1/people/~/connections", accessToken);
+	     
+	    	//Recupération du nombre de contact
+	    	//String test= monJsonObj.toString();
+	    	Integer nbContact = (int)monJsonObj.get("_total").getAsDouble();
+	    	String test = String.valueOf(nbContact);
+	    	Cache.set("test_" + session.getId(), test, "30mn");
+	    	index();
+
+	  }
 	  
 
 

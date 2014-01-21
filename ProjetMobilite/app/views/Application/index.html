@@ -4,6 +4,8 @@
 <div class="navbar-inverse">
    #{if accessLink}
    <span class="label label-info">Bonjour ${me.getPrenom()} ${me.getNom()} </span>
+	<a href="@{recuprerContact()}">recuperer</a>
+	<INPUT type="button" value="Cliquez ici" onclick="alert('${test}')">
       #{/if}
 		#{else}
 		#{/else}
@@ -41,6 +43,8 @@
       <button type="submit" class="btn btn-success">Chercher</button>
     </form>
      </ul>
+     <div class="alert span1 alert-info">
+    <strong>help !</strong></div>
   	 <ul class="nav navbar-nav navbar-right">
       <li><a href="@{logoutFrom_linkedin()}">Déconnexion</a></li>
        </ul>
@@ -48,13 +52,7 @@
 		#{else}
 		 <li class="active"><a href="@{auth_linkedin()}">Connexion</a></li>
 		  </ul>
-		#{/else}
-
-      
-   
- 
-
-  
+		#{/else}  
   </div>
 </nav>
 </div>
