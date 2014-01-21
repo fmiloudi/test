@@ -7,56 +7,54 @@ import javax.persistence.Entity;
 @Entity
 public class Contact extends Model implements Serializable 
 {
-
-       public String getWebId() {
-		return webId;
-	}
-
-	public void setWebId(String webId) {
-		this.webId = webId;
-	}
-
-	public String getPrenom() {
-		return prenom;
-	}
-
-	public void setPrenom(String prenom) {
-		this.prenom = prenom;
-	}
-
-	public String getLocalisation() {
-		return localisation;
-	}
-
-	public void setLocalisation(String localisation) {
-		this.localisation = localisation;
-	}
-
-	public void setNom(String nom) {
-		this.nom = nom;
-	}
-	public String getNom() {
-		return nom;
-	}
-	public String webId;
+	/**
+	 * Constructeur
+	 * 
+	 * @param webId
+	 */
+	
+	   public Contact(String webId) {
+           super();
+           this.webId = webId;
+   }
+	/**
+	 * Constructeur
+	 * 
+	 * @param webId
+	 * @param nom
+	 * @param prenom
+	 * @param localisation
+	 * @param profile
+	 * @param picture
+	 * @param userName
+	 */
+	
+	   public String webId;
        public String nom;
        public String prenom;
        public String localisation;
-       
-       public Contact(String id) {
-               super();
-               this.webId = id;
-       }
+       public String profile;
+       public String picture;
+       public String userName;
+    
 
-       public Contact(String id, String nom, String prenom, String localisation) 
+       public Contact(String id, String nom, String prenom, String localisation, String profile, String picture,String userName) 
        {
                super();
                this.webId = id;
                this.nom = nom;
                this.prenom = prenom;
                this.localisation = localisation;
+               this.picture=picture;
+               this.profile=profile;
+               this.userName = userName;
+               
        }
        
+   	/**
+   	 * @param id
+   	 * @return
+   	 */
        public static Contact getById(String id) {
                return find("webId", id).first();
        }

@@ -1,5 +1,6 @@
 package controllers;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,11 +17,12 @@ import antlr.collections.List;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.mysql.jdbc.Connection;
 
 import models.APIManager;
 import models.Contact;
 
-
+@With(Secure.class)
 public class Application extends Controller {    
 	static boolean connection=false;
 	static boolean contact=false;
@@ -33,37 +35,64 @@ public static APIManager linkedin = new APIManager (
 	    );
     public static void index() 
     {
+    	String user = Security.connected();
     	
     	if(connection==true)   
-    {
-    	String accessLink = Cache.get("accessLink_" + session.getId(), String.class);
-    	String test = Cache.get("test_" + session.getId(), String.class);
-    	Contact me= Cache.get("Me_" + session.getId(), Contact.class);
-    
-    	java.util.List<Contact> listeContacts;
+		    {
+    		 //System.out.println("connection");
+		    	String accessLink = Cache.get("accessLink_" + session.getId(), String.class);
+		    	Contact me= Cache.get("Me_" + session.getId(), Contact.class);
+		    
+		    	java.util.List<Contact> listeContacts;
+		    	java.util.List<Contact> listeContactsUser = new ArrayList<Contact>() ;
+		    	java.util.List<Contact> listeContactsReduit = new ArrayList<Contact>() ;
+		    	
+			   if(contact==true)
+			   {
+				   listeContacts = Contact.findAll();
+				   boolean existe = false;
+				   for(Contact c : listeContacts)
+				   {
+					   if(c.userName.equals(Security.connected()))
+					   {
+						   existe = true; 
+						   
+					   }			   
+				   }
 
-    	java.util.List<Contact> listeContactsReduit = new ArrayList<Contact>() ;
-    	
-   if(contact==true)
-   {
-	   listeContacts = Contact.findAll();
-	   for(int i=0; i<6 && i<listeContacts.size(); i++)
-	   {
-		   listeContactsReduit.add(listeContacts.get(i));
-	   }
+				   if (existe == true)
+				   {
+					   System.out.println("size:"+listeContacts.size());
+					   for(int i=0;  i<listeContacts.size(); i++)
+					   {
+						   if (listeContacts.get(i).userName.equals(Security.connected()))
+						   {
+							   listeContactsReduit.add(listeContacts.get(i));					   
+						   }
+						   System.out.println(listeContacts.get(i).userName+"=?="+Security.connected());
+					   }
 
-   	render(me,accessLink,test, listeContactsReduit);
-   }
-
-	render(me,accessLink,test);
-    
-    }
-    else
-    {
-    	render();
-    }
-    	
-    }
+					   render(me,accessLink,listeContactsReduit);
+				   }
+				   else
+				   {
+					   //recuprerContact();
+					   System.out.println("false");
+					   render(me,accessLink,listeContactsReduit);
+					   
+				   }
+				  
+			
+			   }
+			
+				//render(me,accessLink);
+			    
+			}
+		    else
+		    {
+		    	render();
+		    }
+}
     
     //Fonction du premier bouton : connexion
     public static void auth_linkedin() {
@@ -78,7 +107,7 @@ public static APIManager linkedin = new APIManager (
             String prenomUser = obj.get("lastName").getAsString();
    
             if(Cache.get("Me_") == null) {
-            	Contact me = new Contact(idUser, nomUser, prenomUser, null);
+            	Contact me = new Contact(idUser, nomUser, prenomUser, null, null,null,Security.connected());
                 Cache.set("Me_" + session.getId(), me, "30mn");
             }
             connection=true;
@@ -120,7 +149,7 @@ public static APIManager linkedin = new APIManager (
 	    	String test = String.valueOf(nbContact);
 	    	Cache.set("test_" + session.getId(), test, "30mn");
 	    	HashMap<String,Double> coor = new HashMap<String,Double>();
-	    	String id, nom, prenom, headline, location, picture, profil;
+	    	String id, nom, prenom, picture, profil;
 	    	for (int i=0; i<nbContact; i++)
 	    	{
 	    		id = monJsonObj.get("values").getAsJsonArray().get(i).getAsJsonObject().get("id")
@@ -129,15 +158,31 @@ public static APIManager linkedin = new APIManager (
 						.getAsString();
 	    		prenom = monJsonObj.get("values").getAsJsonArray().get(i).getAsJsonObject().get("lastName")
 						.getAsString();
+	    		profil = monJsonObj.get("values").getAsJsonArray().get(i).getAsJsonObject()
+	    				.get("siteStandardProfileRequest").getAsJsonObject().get("url")
+						.getAsString();
 	    		
-	    		Contact c = new Contact(id, nom,prenom,null);
-	    		c._save();
+	    		if(monJsonObj.get("values").getAsJsonArray().get(i).getAsJsonObject().has("pictureUrl")) {
+	    			picture = monJsonObj.get("values").getAsJsonArray().get(i).getAsJsonObject().get("pictureUrl")
+	    					.getAsString();
+	    		} else {
+	    			picture = "/public/images/nophoto.png";
+	    		}
+	    		
+	    		Contact cont = new Contact(id, nom,prenom,"",profil,picture,Security.connected());
+	    		cont._save();
 	    	}
 	    	contact=true;
 	    	index();
 	    	
 
 	  }
+	  
+	  public static void deleteContactsLinkedIn() {
+		  	Contact.deleteAll();
+		    index();
+		    
+		}
 	  
 
 
